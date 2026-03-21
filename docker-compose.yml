@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      - ./frontend:/app/frontend
+    environment:
+      - DISPLAY=:99
+    depends_on:
+      - chrome
+    networks:
+      - app-network
+
+  chrome:
+    image: selenium/standalone-edge:latest
+    ports:
+      - "4444:4444"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
