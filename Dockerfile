@@ -1,12 +1,14 @@
 FROM python:3.9-slim
 
-# 安装系统依赖
+# 安装Chromium浏览器和系统依赖
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     unzip \
+    chromium \
+    chromium-driver \
     libglib2.0-0 \
-    libnss3  \
+    libnss3 \
     libxss1 \
     fonts-liberation \
     libappindicator3-1 \
@@ -24,15 +26,9 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装Microsoft Edge
-RUN wget -q -O - https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list' \
-    && apt-get update \
-    && apt-get install -y microsoft-edge-stable \
-    && rm -rf /var/lib/apt/lists/*
-
-# 安装Microsoft Edge WebDriver
-RUN apt-get update && apt-get install -y microsoft-edge-driver
+# 设置Chromium环境变量
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROME_DRIVER=/usr/bin/chromedriver
 
 # 设置工作目录
 WORKDIR /app
@@ -46,6 +42,7 @@ RUN pip install --no-cache-dir -r web_requirements.txt
 # 复制应用文件
 COPY app.py .
 COPY frontend ./frontend
+COPY create_excel_template.py .
 
 # 创建必要的目录
 RUN mkdir -p uploads outputs temp
