@@ -1,6 +1,30 @@
 # 构建时间: 2026-03-22 (强制重新构建)
 FROM python:3.9-slim
 
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    unzip \
+    libglib2.0-0 \
+    libnss3 \
+    libxss1 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libxkbcommon0 \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
 # 安装Chromium浏览器和系统依赖
 RUN apt-get update && apt-get install -y \
     wget \
