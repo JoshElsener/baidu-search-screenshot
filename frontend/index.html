@@ -141,33 +141,7 @@
         }
 
         .options-section {
-            background:">第3列（C列）</option>
-                        <option value="3">第4列（D列）</option>
-                        <option value="4">第5列（E列）</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="maxPages">搜索页数</label>
-                    <select id="maxPages">
-                        <option value="1">1页</option>
-                        <option value="2">2页</option>
-                        <option value="3">3页</option>
-                        <option value="4" selected>4页</option>
-                        <option value="5">5页</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary" id="startBtn" disabled onclick="startProcessing()">开始处理</button>
-            </div>
-
-            <!-- 进度显示 -->
-            <div class="progress-section" id="progressSection">
-                <h3>📊 处理进度</h3>
-                
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div #f8f9fa;
+            background: #f8f9fa;
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
@@ -257,6 +231,11 @@
             color: #333;
         }
 
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
         .results-section {
             display: none;
             background: #f8f9fa;
@@ -272,6 +251,12 @@
             font-size: 1.2em;
             margin-bottom: 20px;
             color: #333;
+        }
+
+        .results-section p {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.6;
         }
 
         .results-grid {
@@ -327,6 +312,12 @@
             font-weight: 600;
         }
 
+        .file-info p {
+            margin: 5px 0 0 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
         .error-message {
             display: none;
             background: #f8d7da;
@@ -338,6 +329,38 @@
 
         .error-message.active {
             display: block;
+        }
+
+        .download-hint {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .download-hint h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .download-hint ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .download-hint li {
+            color: #856404;
+            padding: 5px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .download-hint li:before {
+            content: "📁";
+            position: absolute;
+            left: 0;
         }
 
         @media (max-width: 768px) {
@@ -391,6 +414,7 @@
             <!-- 文件信息 -->
             <div class="file-info" id="fileInfo">
                 <h4>✅ 已选择文件: <span id="fileName"></span></h4>
+                <p>文件大小: <span id="fileSize"></span></p>
             </div>
 
             <!-- 错误信息 -->
@@ -410,7 +434,33 @@
                     <select id="columnIndex">
                         <option value="0">第1列（A列）</option>
                         <option value="1">第2列（B列）</option>
-                        <option value="2>
+                        <option value="2">第3列（C列）</option>
+                        <option value="3">第4列（D列）</option>
+                        <option value="4">第5列（E列）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxPages">搜索页数</label>
+                    <select id="maxPages">
+                        <option value="1">1页</option>
+                        <option value="2">2页</option>
+                        <option value="3">3页</option>
+                        <option value="4" selected>4页</option>
+                        <option value="5">5页</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="startBtn" disabled onclick="startProcessing()">开始处理</button>
+            </div>
+
+            <!-- 进度显示 -->
+            <div class="progress-section" id="progressSection">
+                <h3>📊 处理进度</h3>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
                 
                 <div class="progress-info">
                     <span class="progress-text" id="progressText">0%</span>
@@ -424,10 +474,25 @@
             <div class="results-section" id="resultsSection">
                 <h3>📸 处理结果</h3>
                 
+                <p>
+                    ✅ <strong>处理完成！</strong> 共生成 <span id="totalScreenshots">0</span> 张截图<br>
+                    📁 截图已按关键词自动分类，点击下方按钮下载 ZIP 压缩包
+                </p>
+
+                <div class="download-hint">
+                    <h4>💡 下载说明</h4>
+                    <ul>
+                        <li>点击"下载所有截图"按钮获取 ZIP 压缩包</li>
+                        <li>解压后会看到按关键词分类的文件夹</li>
+                        <li>每个文件夹内包含该关键词的所有截图</li>
+                        <li>文件名格式：关键词 + 页码（例如：人工智能1.jpg）</li>
+                    </ul>
+                </div>
+                
                 <div class="results-grid" id="resultsGrid"></div>
                 
                 <div class="action-buttons">
-                    <button class="btn btn-success" onclick="downloadAll()">📥 下载所有截图</button>
+                    <button class="btn btn-success" onclick="downloadAll()">📥 下载所有截图（ZIP）</button>
                     <button class="btn btn-primary" onclick="resetForm()">🔄 重新开始</button>
                 </div>
             </div>
@@ -454,7 +519,131 @@
             uploadSection.classList.remove('dragover');
         });
 
-        uploadSection.addEventListener('drop', (e)页面重试');
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelection(file) {
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showError('请上传有效的Excel文件（.xlsx, .xls, .csv）');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.add('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').classList.add('active');
+        }
+
+        // 开始处理
+        async function startProcessing() {
+            if (!selectedFile) {
+                showError('请先选择Excel文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // 上传文件
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('文件上传失败');
+                }
+
+                const uploadData = await uploadResponse.json();
+                
+                // 显示上传成功提示
+                document.getElementById('errorMessage').classList.remove('active');
+                document.getElementById('fileInfo').innerHTML = `
+                    <h4>✅ 上传成功！文件: <span id="fileName">${selectedFile.name}</span></h4>
+                    <p>正在创建任务...</p>
+                `;
+                
+                // 创建处理任务
+                const processRequest = {
+                    excel_filename: selectedFile.name,
+                    sheet_name: document.getElementById('sheetName').value || null,
+                    column_index: parseInt(document.getElementById('columnIndex').value),
+                    max_pages: parseInt(document.getElementById('maxPages').value)
+                };
+
+                const processResponse = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(processRequest)
+                });
+
+                if (!processResponse.ok) {
+                    throw new Error('创建任务失败');
+                }
+
+                const processData = await processResponse.json();
+                currentTaskId = processData.task_id;
+
+                // 显示进度区域
+                document.getElementById('progressSection').classList.add('active');
+                document.getElementById('startBtn').disabled = true;
+
+                // 建立WebSocket连接
+                connectWebSocket();
+
+            } catch (error) {
+                showError('处理失败: ' + error.message);
+            }
+        }
+
+        // WebSocket连接
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/${currentTaskId}`;
+            websocket = new WebSocket(wsUrl);
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                updateProgress(data);
+            };
+
+            websocket.onerror = (error) => {
+                console.error('WebSocket错误:', error);
+                showError('连接失败，请刷新页面重试');
             };
 
             websocket.onclose = () => {
@@ -500,6 +689,15 @@
                 const data = await response.json();
                 displayResults(data.screenshots);
                 
+                // 显示完成提示
+                document.getElementById('statusMessage').innerHTML = `
+                    <strong>✅ 处理完成！</strong><br>
+                    共生成 ${data.total} 张截图<br>
+                    请滚动到页面底部下载结果
+                `;
+                document.getElementById('statusMessage').classList.add('success');
+                document.getElementById('totalScreenshots').textContent = data.total;
+                
                 // 关闭WebSocket连接
                 if (websocket) {
                     websocket.close();
@@ -520,114 +718,7 @@
                 item.className = 'result-item';
                 
                 item.innerHTML = `
-                    <img src="${screenshot.url}" alt="${screenshot => {
-            e.preventDefault();
-            uploadSection.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelection(files[0]);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelection(e.target.files[0]);
-            }
-        });
-
-        function handleFileSelection(file) {
-            const validExtensions = ['.xlsx', '.xls', '.csv'];
-            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-            
-            if (!validExtensions.includes(fileExtension)) {
-                showError('请上传有效的Excel文件（.xlsx, .xls, .csv）');
-                return;
-            }
-
-            selectedFile = file;
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileInfo').classList.add('active');
-            document.getElementById('errorMessage').classList.remove('active');
-            document.getElementById('startBtn').disabled = false;
-        }
-
-        function showError(message) {
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('errorMessage').classList.add('active');
-        }
-
-        // 开始处理
-        async function startProcessing() {
-            if (!selectedFile) {
-                showError('请先选择Excel文件');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-
-            try {
-                // 上传文件
-                const uploadResponse = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!uploadResponse.ok) {
-                    throw new Error('文件上传失败');
-                }
-
-                const uploadData = await uploadResponse.json();
-                
-                // 创建处理任务
-                const processRequest = {
-                    excel_filename: selectedFile.name,
-                    sheet_name: document.getElementById('sheetName').value || null,
-                    column_index: parseInt(document.getElementById('columnIndex').value),
-                    max_pages: parseInt(document.getElementById('maxPages').value)
-                };
-
-                const processResponse = await fetch('/api/process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(processRequest)
-                });
-
-                if (!processResponse.ok) {
-                    throw new Error('创建任务失败');
-                }
-
-                const processData = await processResponse.json();
-                currentTaskId = processData.task_id;
-
-                // 显示进度区域
-                document.getElementById('progressSection').classList.add('active');
-                document.getElementById('startBtn').disabled = true;
-
-                // 建立WebSocket连接
-                connectWebSocket();
-
-            } catch (error) {
-                showError('处理失败: ' + error.message);
-            }
-        }
-
-        // WebSocket连接
-        function connectWebSocket() {
-            const wsUrl = `ws://${window.location.host}/ws/${currentTaskId}`;
-            websocket = new WebSocket(wsUrl);
-
-            websocket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                updateProgress(data);
-            };
-
-            websocket.onerror = (error) => {
-                console.error('WebSocket错误:', error);
-                showError('连接失败，请刷新.filename}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23f8f9fa%22 width=%22250%22 height=%22200%22/><text fill=%22%23666%22 font-family=%22Arial%22 font-size=%2216%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22>加载失败</text></svg>'">
+                    <img src="${screenshot.url}" alt="${screenshot.filename}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23f8f9fa%22 width=%22250%22 height=%22200%22/><text fill=%22%23666%22 font-family=%22Arial%22 font-size=%2216%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22>加载失败</text></svg>'">
                     <div class="filename">${screenshot.filename}</div>
                 `;
                 
@@ -657,6 +748,7 @@
             
             document.getElementById('fileInput').value = '';
             document.getElementById('fileName').textContent = '';
+            document.getElementById('fileSize').textContent = '';
             document.getElementById('sheetName').value = '';
             document.getElementById('columnIndex').value = '0';
             document.getElementById('maxPages').value = '4';
@@ -671,6 +763,7 @@
             document.getElementById('progressText').textContent = '0%';
             document.getElementById('progressStats').textContent = '等待中...';
             document.getElementById('statusMessage').textContent = '';
+            document.getElementById('statusMessage').classList.remove('success');
             document.getElementById('resultsGrid').innerHTML = '';
             
             if (websocket) {
