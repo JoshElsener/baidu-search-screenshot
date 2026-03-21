@@ -1,6 +1,6 @@
 """
 百度搜索截图在线工具 - FastAPI后端服务
-支持Excel上传、Edge浏览器自动化搜索、截图生成和下载
+支持Excel上传、Chromium浏览器自动化搜索、截图生成和下载
 """
 
 import os
@@ -20,7 +20,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 import zipfile
 import shutil
 
@@ -81,25 +81,28 @@ def clean_filename(filename):
     return filename.strip()
 
 
-def create_edge_driver():
-    """创建Edge浏览器驱动"""
+def create_chrome_driver():
+    """创建Chromium浏览器驱动"""
     try:
-        edge_options = EdgeOptions()
-        edge_options.add_argument('--headless')
-        edge_options.add_argument('--no-sandbox')
-        edge_options.add_argument('--disable-dev-shm-usage')
-        edge_options.add_argument('--disable-gpu')
-        edge_options.add_argument('--window-size=1920,1080')
-        edge_options.add_argument('--disable-blink-features=AutomationControlled')
-        edge_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        edge_options.add_experimental_option('useAutomationExtension', False)
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_argument('--disable-software-rasterizer')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        driver = webdriver.Edge(options=edge_options)
+        # 使用系统安装的Chromium
+        driver = webdriver.Chrome(options=chrome_options)
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         
         return driver
     except Exception as e:
-        logger.error(f"创建Edge驱动失败: {str(e)}")
+        logger.error(f"创建Chrome驱动失败: {str(e)}")
         raise
 
 
@@ -148,10 +151,10 @@ async def process_search_task(task_id: str, request: TaskRequest):
         task_output_dir = os.path.join(OUTPUT_DIR, task_id)
         os.makedirs(task_output_dir, exist_ok=True)
         
-        # 创建Edge浏览器驱动
+        # 创建Chromium浏览器驱动
         driver = None
         try:
-            driver = create_edge_driver()
+            driver = create_chrome_driver()
             wait = WebDriverWait(driver, 10)
             
             # 处理每个关键词
