@@ -1,3 +1,4 @@
+# 构建时间: 2026-03-22 (强制重新构建)
 FROM python:3.9-slim
 
 # 安装Chromium浏览器和系统依赖
@@ -42,7 +43,6 @@ RUN pip install --no-cache-dir -r web_requirements.txt
 # 复制应用文件
 COPY app.py .
 COPY frontend ./frontend
-COPY create_excel_template.py .
 
 # 创建必要的目录
 RUN mkdir -p uploads outputs temp
