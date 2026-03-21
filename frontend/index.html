@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百度搜索截图在线工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .upload-section:hover {
+            background: #e9ecef;
+            border-color: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .upload-section.dragover {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .upload-section h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .upload-section p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .options-section {
+            background:">第3列（C列）</option>
+                        <option value="3">第4列（D列）</option>
+                        <option value="4">第5列（E列）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxPages">搜索页数</label>
+                    <select id="maxPages">
+                        <option value="1">1页</option>
+                        <option value="2">2页</option>
+                        <option value="3">3页</option>
+                        <option value="4" selected>4页</option>
+                        <option value="5">5页</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="startBtn" disabled onclick="startProcessing()">开始处理</button>
+            </div>
+
+            <!-- 进度显示 -->
+            <div class="progress-section" id="progressSection">
+                <h3>📊 处理进度</h3>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .options-section h3 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .progress-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-text {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .progress-stats {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .results-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-section h3 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .result-item .filename {
+            padding: 10px;
+            font-size: 0.9em;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .file-info {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-info h4 {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 百度搜索截图在线工具</h1>
+            <p>上传Excel文件，自动搜索并生成截图</p>
+        </div>
+
+        <div class="content">
+            <!-- 文件上传区域 -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📁</div>
+                <h3>点击或拖拽Excel文件到此处</h3>
+                <p>支持 .xlsx, .xls, .csv 格式</p>
+                <input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv">
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">选择文件</button>
+            </div>
+
+            <!-- 文件信息 -->
+            <div class="file-info" id="fileInfo">
+                <h4>✅ 已选择文件: <span id="fileName"></span></h4>
+            </div>
+
+            <!-- 错误信息 -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- 配置选项 -->
+            <div class="options-section">
+                <h3>⚙️ 配置选项</h3>
+                
+                <div class="form-group">
+                    <label for="sheetName">工作表名称（可选）</label>
+                    <input type="text" id="sheetName" placeholder="留空使用第一个工作表">
+                </div>
+
+                <div class="form-group">
+                    <label for="columnIndex">关键词列号</label>
+                    <select id="columnIndex">
+                        <option value="0">第1列（A列）</option>
+                        <option value="1">第2列（B列）</option>
+                        <option value="2>
+                
+                <div class="progress-info">
+                    <span class="progress-text" id="progressText">0%</span>
+                    <span class="progress-stats" id="progressStats">等待中...</span>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+
+            <!-- 结果展示 -->
+            <div class="results-section" id="resultsSection">
+                <h3>📸 处理结果</h3>
+                
+                <div class="results-grid" id="resultsGrid"></div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="downloadAll()">📥 下载所有截图</button>
+                    <button class="btn btn-primary" onclick="resetForm()">🔄 重新开始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let currentTaskId = null;
+        let websocket = null;
+
+        // 文件上传处理
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadSection.addEventListener('click', () => fileInput.click());
+        
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e)页面重试');
+            };
+
+            websocket.onclose = () => {
+                console.log('WebSocket连接关闭');
+            };
+        }
+
+        // 更新进度
+        function updateProgress(data) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressStats = document.getElementById('progressStats');
+            const statusMessage = document.getElementById('statusMessage');
+
+            progressFill.style.width = data.progress + '%';
+            progressText.textContent = data.progress + '%';
+            
+            if (data.total > 0) {
+                progressStats.textContent = `${data.completed}/${data.total} 已完成`;
+            } else {
+                progressStats.textContent = '处理中...';
+            }
+            
+            statusMessage.textContent = data.message;
+
+            // 检查任务状态
+            if (data.status === 'completed') {
+                showResults(data.task_id);
+            } else if (data.status === 'failed') {
+                showError('任务失败: ' + data.message);
+            }
+        }
+
+        // 显示结果
+        async function showResults(taskId) {
+            try {
+                const response = await fetch(`/api/preview/${taskId}`);
+                
+                if (!response.ok) {
+                    throw new Error('获取结果失败');
+                }
+
+                const data = await response.json();
+                displayResults(data.screenshots);
+                
+                // 关闭WebSocket连接
+                if (websocket) {
+                    websocket.close();
+                }
+
+            } catch (error) {
+                showError('获取结果失败: ' + error.message);
+            }
+        }
+
+        // 显示结果网格
+        function displayResults(screenshots) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            resultsGrid.innerHTML = '';
+
+            screenshots.forEach(screenshot => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                
+                item.innerHTML = `
+                    <img src="${screenshot.url}" alt="${screenshot => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelection(file) {
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showError('请上传有效的Excel文件（.xlsx, .xls, .csv）');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileInfo').classList.add('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').classList.add('active');
+        }
+
+        // 开始处理
+        async function startProcessing() {
+            if (!selectedFile) {
+                showError('请先选择Excel文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // 上传文件
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('文件上传失败');
+                }
+
+                const uploadData = await uploadResponse.json();
+                
+                // 创建处理任务
+                const processRequest = {
+                    excel_filename: selectedFile.name,
+                    sheet_name: document.getElementById('sheetName').value || null,
+                    column_index: parseInt(document.getElementById('columnIndex').value),
+                    max_pages: parseInt(document.getElementById('maxPages').value)
+                };
+
+                const processResponse = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(processRequest)
+                });
+
+                if (!processResponse.ok) {
+                    throw new Error('创建任务失败');
+                }
+
+                const processData = await processResponse.json();
+                currentTaskId = processData.task_id;
+
+                // 显示进度区域
+                document.getElementById('progressSection').classList.add('active');
+                document.getElementById('startBtn').disabled = true;
+
+                // 建立WebSocket连接
+                connectWebSocket();
+
+            } catch (error) {
+                showError('处理失败: ' + error.message);
+            }
+        }
+
+        // WebSocket连接
+        function connectWebSocket() {
+            const wsUrl = `ws://${window.location.host}/ws/${currentTaskId}`;
+            websocket = new WebSocket(wsUrl);
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                updateProgress(data);
+            };
+
+            websocket.onerror = (error) => {
+                console.error('WebSocket错误:', error);
+                showError('连接失败，请刷新.filename}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23f8f9fa%22 width=%22250%22 height=%22200%22/><text fill=%22%23666%22 font-family=%22Arial%22 font-size=%2216%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22>加载失败</text></svg>'">
+                    <div class="filename">${screenshot.filename}</div>
+                `;
+                
+                resultsGrid.appendChild(item);
+            });
+
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        // 下载所有截图
+        function downloadAll() {
+            if (!currentTaskId) return;
+            
+            const downloadUrl = `/api/download/${currentTaskId}`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `screenshots_${currentTaskId}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 重置表单
+        function resetForm() {
+            selectedFile = null;
+            currentTaskId = null;
+            
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('sheetName').value = '';
+            document.getElementById('columnIndex').value = '0';
+            document.getElementById('maxPages').value = '4';
+            
+            document.getElementById('fileInfo').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('progressSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('startBtn').disabled = true;
+            
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '0%';
+            document.getElementById('progressStats').textContent = '等待中...';
+            document.getElementById('statusMessage').textContent = '';
+            document.getElementById('resultsGrid').innerHTML = '';
+            
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+        }
+    </script>
+</body>
+</html>
