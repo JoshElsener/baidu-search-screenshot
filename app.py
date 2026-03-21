@@ -48,8 +48,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(TEMP_DIR, exist_ok=True)
 
-# 挂载静态文件目录
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+# 挂载静态文件目录 - 修复路由优先级问题
 app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 # 全局任务状态存储（生产环境应使用Redis）
