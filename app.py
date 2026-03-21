@@ -1,6 +1,6 @@
 """
 百度搜索截图在线工具 - FastAPI后端服务
-支持Excel上传、Chromium浏览器自动化搜索、截图生成和下载
+支持Excel上传、Edge浏览器自动化搜索、截图生成和下载
 """
 
 import os
@@ -49,7 +49,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 # 挂载静态文件目录
-app.mount("/static", StaticFiles(directory="frontend"), name="frontend")
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 # 全局任务状态存储（生产环境应使用Redis）
@@ -175,7 +175,7 @@ async def process_search_task(task_id: str, request: TaskRequest):
                     
                     # 访问百度首页
                     driver.get("https://www.baidu.com")
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(1.5)
                     
                     # 输入搜索关键词
                     search_box = wait.until(
@@ -184,7 +184,7 @@ async def process_search_task(task_id: str, request: TaskRequest):
                     search_box.clear()
                     search_box.send_keys(keyword)
                     search_box.send_keys(Keys.RETURN)
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2)
                     
                     # 逐页截图
                     for page in range(1, request.max_pages + 1):
@@ -194,7 +194,7 @@ async def process_search_task(task_id: str, request: TaskRequest):
                             
                             # 滚动到页面顶部
                             driver.execute_script("window.scrollTo(0, 0);")
-                            await asyncio.sleep(1)
+                            await asyncio.sleep(0.5)
                             
                             # 截图
                             driver.save_screenshot(screenshot_path)
@@ -207,7 +207,7 @@ async def process_search_task(task_id: str, request: TaskRequest):
                                     next_button = driver.find_element(By.CSS_SELECTOR, "a.n")
                                     if next_button and next_button.is_displayed():
                                         next_button.click()
-                                        await asyncio.sleep(3)
+                                        await asyncio.sleep(2)
                                     else:
                                         logger.warning(f"关键词 '{keyword}' 第{page}页后没有更多结果")
                                         break
@@ -233,25 +233,43 @@ async def process_search_task(task_id: str, request: TaskRequest):
                     continue
             
             # 创建ZIP压缩包
-            zip_filename = f"{task_id}_screenshots.zip"
-            zip_path = os.path.join(OUTPUT_DIR, zip_filename)
-            
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            try:
+                # 检查是否生成了截图
+                screenshot_files = []
                 for root, dirs, files in os.walk(task_output_dir):
                     for file in files:
-                        file_path = os.path.join(root, file)
-                        arcname = os.path.relpath(file_path, task_output_dir)
-                        zipf.write(file_path, arcname)
-            
-            # 更新任务状态为完成
-            task_status[task_id].update({
-                "status": "completed",
-                "progress": 100,
-                "message": "处理完成！",
-                "end_time": datetime.now().isoformat(),
-                "zip_filename": zip_filename,
-                "download_url": f"/outputs/{zip_filename}"
-            })
+                        if file.endswith(('.jpg', '.png')):
+                            screenshot_files.append(os.path.join(root, file))
+                
+                if not screenshot_files:
+                    raise Exception("没有生成任何截图文件，请检查百度搜索是否成功")
+                
+                logger.info(f"共找到 {len(screenshot_files)} 张截图文件")
+                
+                zip_filename = f"{task_id}_screenshots.zip"
+                zip_path = os.path.join(OUTPUT_DIR, zip_filename)
+                
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for root, dirs, files in os.walk(task_output_dir):
+                        for file in files:
+                            file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(file_path, task_output_dir)
+                            zipf.write(file_path, arcname)
+                
+                logger.info(f"ZIP 压缩包创建成功: {zip_filename}")
+                
+                # 更新任务状态为完成
+                task_status[task_id].update({
+                    "status": "completed",
+                    "progress": 100,
+                    "message": f"处理完成！共生成 {len(screenshot_files)} 张截图",
+                    "end_time": datetime.now().isoformat(),
+                    "zip_filename": zip_filename,
+                    "download_url": f"/outputs/{zip_filename}"
+                })
+            except Exception as e:
+                logger.error(f"创建ZIP压缩包失败: {str(e)}")
+                raise Exception(f"生成结果失败: {str(e)}")
             
         except Exception as e:
             logger.error(f"浏览器操作失败: {str(e)}")
@@ -323,7 +341,6 @@ async def process_task(request: TaskRequest, background_tasks: BackgroundTasks):
             status="queued",
             message="任务已加入处理队列"
         )
-    
     except Exception as e:
         logger.error(f"创建任务失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"创建任务失败: {str(e)}")
@@ -354,7 +371,6 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
                     break
             
             await asyncio.sleep(1)
-    
     except Exception as e:
         logger.error(f"WebSocket连接错误: {str(e)}")
         await websocket.close()
