@@ -6,10 +6,8 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     unzip \
     libglib2.0-0 \
-    libnss3 \
-    libgconf-2-4 \
+    libnss3  \
     libxss1 \
-    libappindicator1 \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
