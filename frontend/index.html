@@ -548,7 +548,9 @@
 
         // WebSocket连接
         function connectWebSocket() {
-            const wsUrl = `ws://${window.location.host}/ws/${currentTaskId}`;
+            // 自动检测协议：HTTPS使用wss://，HTTP使用ws://
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/ws/${currentTaskId}`;
             websocket = new WebSocket(wsUrl);
 
             websocket.onmessage = (event) => {
