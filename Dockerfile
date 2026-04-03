@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装Chromium浏览器（更小的包）
+# 安装Chromium浏览器
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-driver \
@@ -54,8 +54,8 @@ WORKDIR /app
 # 复制依赖文件
 COPY web_requirements.txt .
 
-# 安装Python依赖
-RUN pip install --no-cache-dir -r web_requirements.txt
+# 使用国内源加速安装
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r web_requirements.txt
 
 # 复制应用文件
 COPY app.py .
@@ -74,9 +74,9 @@ ENV DISPLAY=:99
 ENV PYTHONPATH=/app
 ENV TZ=Asia/Shanghai
 
-# 优化内存设置 - 适配Render的512MB内存限制
+# 优化内存设置
 ENV MAX_OLD_SPACE_SIZE=256
 ENV NODE_OPTIONS="--max-old-space-size=$MAX_OLD_SPACE_SIZE"
 
-# 启动命令 - 先启动Xvfb虚拟显示，再启动应用
+# 启动命令
 CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 -ac & python app.py"]
