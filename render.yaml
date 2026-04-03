@@ -1,13 +1,10 @@
 services:
   - type: web
     name: baidu-search-screenshot
-    env: docker
-    region: singapore
-    plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    buildCommand: pip install -r web_requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: PORT
-        value: "8000"
+        value: 1
+      - key: TZ
+        value: Asia/Shanghai
